@@ -20,7 +20,7 @@ void setup() {
 
 void loop() {
 	blink(3, 50); // blink led (n times, ms interval)
-	delay(100); // wait 1 sec
+	delay(500); // wait 1 sec
 }
 
 

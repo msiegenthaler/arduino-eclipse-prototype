@@ -15,7 +15,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="Blink" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.106021252" name="Boarduino" parent="de.innot.avreclipse.configuration.app.debug">
+<configuration artifactName="irrf" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.106021252" name="Boarduino" parent="de.innot.avreclipse.configuration.app.debug">
 <folderInfo id="de.innot.avreclipse.configuration.app.debug.106021252." name="/" resourcePath="">
 <toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.1864385764" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug">
 <option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1378572874" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug" value="true" valueType="boolean"/>
@@ -492,7 +492,7 @@
 </extensions>
 </storageModule>
 <storageModule moduleId="cdtBuildSystem" version="4.0.0">
-<configuration artifactName="Blink" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.106021252.539723173" name="Mega" parent="de.innot.avreclipse.configuration.app.debug">
+<configuration artifactName="irrf" buildArtefactType="de.innot.avreclipse.buildArtefactType.app" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=de.innot.avreclipse.buildArtefactType.app" description="" id="de.innot.avreclipse.configuration.app.debug.106021252.539723173" name="Mega" parent="de.innot.avreclipse.configuration.app.debug">
 <folderInfo id="de.innot.avreclipse.configuration.app.debug.106021252.539723173." name="/" resourcePath="">
 <toolChain id="de.innot.avreclipse.toolchain.winavr.app.debug.1975138861" name="AVR-GCC Toolchain" superClass="de.innot.avreclipse.toolchain.winavr.app.debug">
 <option id="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug.1679658693" name="Generate HEX file for Flash memory" superClass="de.innot.avreclipse.toolchain.options.toolchain.objcopy.flash.app.debug" value="true" valueType="boolean"/>

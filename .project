@@ -3,6 +3,7 @@
 	<name>gidaivel-arduino-irrf</name>
 	<comment></comment>
 	<projects>
+		<project>arduino-xbee</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

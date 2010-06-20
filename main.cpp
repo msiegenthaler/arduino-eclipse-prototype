@@ -3,6 +3,11 @@
 #include "RemoteControlProtocolHandler.h"
 #include "SerialOutProtocolHandler.h"
 #include "ComposedProtocolHandler.h"
+#include "../arduino-xbee/Series1XBee.h"
+#include "../arduino-xbee/LowlevelXBee.h"
+#include "../arduino-xbee/NewSoftSerialApiModeXBee.h"
+#include "IRRFReceiver.h"
+
 
 extern "C" void __cxa_pure_virtual(void);
 void __cxa_pure_virtual(void) {}
@@ -23,6 +28,7 @@ int ledPin = 13; // LED connected to digital pin 13
 
 RemoteController rc;
 
+/*
 RemoteControlProtocolHandler* makeSony() {
 	uint16_t preSeq[] =  {0, 2450};
 	uint16_t zeroSeq[] = {500,  650};
@@ -87,25 +93,31 @@ void rc_handler(rc_code code, void* object) {
 //	Serial.print(" - ");
 //	Serial.println(code.code, 2);
 }
+*/
 
+Avieul *avieul;
 
 void setup() {
-	Serial.begin(38400); // opens serial port, sets data rate to 9600 bps
+	Serial.begin(38400); // for debugging
 	pinMode(ledPin, OUTPUT); // sets the digital pin as output
 	digitalWrite(ledPin, LOW);
 
+	NewSoftSerial *serial = new NewSoftSerial(4, 5);
+	serial->begin(19200);
+	LowlevelXBee *lowlevel = new NewSoftSerialApiModeXBee(serial);
+	Series1XBee *xbee = new Series1XBee(lowlevel);
+
 	rc.init(3, 2);
-	rc.addProtocol(makeSony());
-	rc.addProtocol(makeAccuphase());
-//	rc.addProtocol(makeIntertechno());
-//	rc.addProtocol(makeTelis());
-//	rc.addProtocol(new SerialOutProtocolHandler());
-	rc.setHandler(rc_handler, NULL);
+	IRRFReceiver *irrf = new IRRFReceiver(&rc);
+
+	AvieulService* services[] = { irrf };
+	avieul = new Avieul(xbee, services, 1);
 
 	Serial.println("Started");
 }
 
 void loop() {
+	avieul->process();
 	rc.detect();
 }
 

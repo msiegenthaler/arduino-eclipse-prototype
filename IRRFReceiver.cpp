@@ -95,13 +95,13 @@ bool IRRFReceiver::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len
 	uint8_t suffix_len = data[5];
 	uint8_t bit_count = data[6];
 	if (pre_len+bit_len+suffix_len+7 > len) {
-#ifdef DEBUG_AVIEUL
+#ifdef DEBUG_IRRF
 		Serial.print("irrfr: addsfp: malformed (count)");
 #endif
 		return false;
 	}
 	if (bit_len<1) {
-#ifdef DEBUG_AVIEUL
+#ifdef DEBUG_IRRF
 		Serial.print("irrfr: addsfp: malformed (bit len)");
 #endif
 		return false;
@@ -211,5 +211,15 @@ void IRRFReceiver::handleReceivedCode(rc_code code) {
 	for (uint8_t i=0; i<_subscriber_count; i++) {
 		_sender->send(_subscribers[i], data, 9);
 	}
+
+#ifdef DEBUG_IRRF
+	Serial.print("irrf: sent received command ");
+	Serial.print(code.type, HEX);
+	Serial.print(" - ");
+	Serial.print(code.code, HEX);
+	Serial.print(" to ");
+	Serial.print(_subscriber_count, 10);
+	Serial.println(" subscribers.");
+#endif
 }
 

@@ -27,12 +27,14 @@ public:
 
 	/**
 	 * Initialize and start the instance.
+	 * Don't forget to add protocols, else most operations will not do much.
 	 * @param sender_pin pin used to send the commands
 	 * @param detector_pin pin used to detect to commands
-	 * @param protocols protocol implementations
-	 * @param protocol_count Length of protocols
 	 */
-	void init(uint8_t sender_pin, uint8_t detector_pin, RemoteControlProtocolHandler **protocols, uint8_t protocols_count);
+	void init(uint8_t sender_pin, uint8_t detector_pin);
+
+	void addProtocol(RemoteControlProtocolHandler *protocol);
+	void removeProtocol(RemoteControlProtocolHandler *protocol);
 
 	/**
 	 * Sets the callback function that is called on detected rc-codes

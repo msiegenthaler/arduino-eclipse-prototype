@@ -39,7 +39,7 @@ RemoteController::RemoteController() {
 	_protocols_count = 0;
 }
 
-void RemoteController::init(uint8_t sender_pin, uint8_t detector_pin, RemoteControlProtocolHandler **protocols, uint8_t protocols_count) {
+void RemoteController::init(uint8_t sender_pin, uint8_t detector_pin) {
 	int interrupt;
 	if (detector_pin == 2) interrupt = 0;
 	else if (detector_pin == 3) interrupt = 1;
@@ -55,21 +55,60 @@ void RemoteController::init(uint8_t sender_pin, uint8_t detector_pin, RemoteCont
 	_sender_pin = sender_pin;
 	pinMode(_sender_pin, OUTPUT);
 
-	_protocols = (RemoteControlProtocolHandler**)malloc(sizeof(RemoteControlProtocolHandler*) * protocols_count);
-	_protocols_count = protocols_count;
-
-	for (int i=0; i<_protocols_count; i++) {
-		_protocols[i] = protocols[i];
-		if (_handler)
-			_protocols[i]->setHandler(_handler);
-	}
+	_protocols_count = 0;
+	_protocols = NULL;
 
 #ifdef RC_DEBUG
-	Serial.print("initialized RemoteController with ");
-	Serial.print(protocols_count, 10);
-	Serial.println(" protocols.");
+	Serial.print("rc: initialized.");
 #endif
 }
+
+
+inline bool exists(RemoteControlProtocolHandler **all, uint8_t count, RemoteControlProtocolHandler *toFind) {
+	for (uint8_t i=0; i<count; i++) {
+		if (all[i] == toFind) return true;
+	}
+	return false;
+}
+
+void RemoteController::addProtocol(RemoteControlProtocolHandler *protocol) {
+	if (exists(_protocols, _protocols_count, protocol)) return; //already exists
+
+	protocol->setHandler(_handler);
+
+	size_t size = sizeof(RemoteControlProtocolHandler*) * (_protocols_count + 1);
+	RemoteControlProtocolHandler **na = (RemoteControlProtocolHandler**)malloc(size);
+	memcpy(na, _protocols, size);
+	na[_protocols_count] = protocol;
+	free(_protocols);
+	_protocols = na;
+	_protocols_count++;
+
+#ifdef RC_DEBUG
+	Serial.println("rc: added protocol");
+#endif
+}
+void RemoteController::removeProtocol(RemoteControlProtocolHandler *protocol) {
+	if (!exists(_protocols, _protocols_count, protocol)) return; //does not exist
+
+	size_t size = sizeof(RemoteControlProtocolHandler*) * (_protocols_count - 1);
+	RemoteControlProtocolHandler **na = (RemoteControlProtocolHandler**)malloc(size);
+	uint8_t c = 0;
+	for (uint8_t i=0; i<_protocols_count; i++) {
+		if (_protocols[i] == protocol) break;
+		na[c++] = _protocols[i];
+	}
+	free(_protocols);
+	_protocols = na;
+	_protocols_count = c;
+
+	protocol->setHandler(NULL);
+
+#ifdef RC_DEBUG
+	Serial.println("rc: removed protocol");
+#endif
+}
+
 
 void RemoteController::setHandler(void (*handler_fun)(rc_code)) {
 	_handler = handler_fun;
@@ -79,7 +118,7 @@ void RemoteController::setHandler(void (*handler_fun)(rc_code)) {
 	}
 
 #ifdef RC_DEBUG
-	Serial.println("Set handler for RemoteController");
+	Serial.println("rc: set handler");
 #endif
 }
 
@@ -111,7 +150,7 @@ void RemoteController::detect() {
 	}
 #ifdef RC_DEBUG
 	if (len == RC_BUFFER_SIZE) {
-		Serial.println("RC buffer overflow");
+		Serial.println("rc: buffer overflow");
 	}
 #endif
 }

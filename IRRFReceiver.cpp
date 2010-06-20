@@ -60,6 +60,6 @@ void IRRFReceiver::removeSubscriber(XBeeAddress from) {
 	}
 	free(_subscribers);
 	_subscribers = na;
-	_subscriber_count--;
+	_subscriber_count = c;
 }
 

@@ -82,10 +82,10 @@ RemoteControlProtocolHandler* makeTelis4() {
 void rc_handler(rc_code code) {
 	Serial.print("Detected code ");
 	Serial.print(code.type, 10);
-//	Serial.print(" - 0x");
-//	Serial.println(code.code, HEX);
-	Serial.print(" - ");
-	Serial.println(code.code, 2);
+	Serial.print(" - 0x");
+	Serial.println(code.code, HEX);
+//	Serial.print(" - ");
+//	Serial.println(code.code, 2);
 }
 
 
@@ -94,13 +94,12 @@ void setup() {
 	pinMode(ledPin, OUTPUT); // sets the digital pin as output
 	digitalWrite(ledPin, LOW);
 
-	RemoteControlProtocolHandler* protocols[1];
-//	protocols[0] = new SerialOutProtocolHandler();
-//	protocols[0] = makeIntertechno();
-	protocols[0] = makeTelis4();
-//	protocols[0] = makeSony();
-//	protocols[1] = makeAccuphase();
-	rc.init(3, 2, protocols, 1);
+	rc.init(3, 2);
+	rc.addProtocol(makeSony());
+	rc.addProtocol(makeAccuphase());
+//	rc.addProtocol(makeIntertechno());
+//	rc.addProtocol(makeTelis());
+//	rc.addProtocol(new SerialOutProtocolHandler());
 	rc.setHandler(rc_handler);
 
 	Serial.println("Started");

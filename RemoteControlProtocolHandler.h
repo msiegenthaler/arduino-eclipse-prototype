@@ -7,7 +7,7 @@
  * Interface for pulse iterators.
  */
 class PulseIterator {
-  public:
+public:
 	/**
 	 * Returns the next pulse.
 	 * @param pulseHighUs duration in microseconds of the HIGH-pulse
@@ -21,12 +21,13 @@ class PulseIterator {
  * Interface for a remote control protocol.
  */
 class RemoteControlProtocolHandler {
-  public:
+public:
 	/**
 	 * Sets the callback function that is called on detected rc-codes
 	 * @param handler_fun pointer to the function
+	 * @param object will be passed to the handler_fun
 	 */
-	virtual void setHandler(void (*handler_fun)(rc_code));
+	virtual void setHandler(void (*handler_fun)(rc_code, void*), void *object);
 
 	/**
 	 * Process the pulses and perform the code detection on it.
@@ -43,6 +44,14 @@ class RemoteControlProtocolHandler {
 	 * @return the pulse iterator or nil if unknown code
 	 */
 	virtual PulseIterator* makePulseIterator(rc_code code);
+};
+
+/**
+ * Remote control protocol handler that emits a single type only.
+ */
+class SingleTypeRemoteControlProtocolHandler : public RemoteControlProtocolHandler {
+public:
+	virtual uint8_t getType();
 };
 
 #endif

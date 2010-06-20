@@ -9,13 +9,19 @@ ComposedProtocolHandler::ComposedProtocolHandler(uint8_t type, PartHandler *pre,
 	_repeats_to_trigger = max(1, round(((float)repeats) * 2 / 3));
 	_state = CPH_STATE_INIT;
 	_handler = NULL;
+	_handler_object = NULL;
 	_candidate = 0;
 	_candidate_count = 0;
 	_candidate_t = 0;
 }
 
-void ComposedProtocolHandler::setHandler(void (*handler_fun)(rc_code)) {
+uint8_t ComposedProtocolHandler::getType() {
+	return _type;
+}
+
+void ComposedProtocolHandler::setHandler(void (*handler_fun)(rc_code, void*), void *object) {
 	_handler = handler_fun;
+	_handler_object = object;
 }
 
 void ComposedProtocolHandler::processPulse(uint16_t high, uint16_t low) {
@@ -165,7 +171,7 @@ void ComposedProtocolHandler::handleCandidate(uint32_t candidate) {
 		rc_code code;
 		code.type = _type;
 		code.code = candidate;
-		_handler(code);
+		if (_handler) _handler(code, _handler_object);
 	}
 }
 

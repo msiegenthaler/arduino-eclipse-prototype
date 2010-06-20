@@ -79,7 +79,7 @@ RemoteControlProtocolHandler* makeTelis4() {
 			NULL, 1);
 }
 
-void rc_handler(rc_code code) {
+void rc_handler(rc_code code, void* object) {
 	Serial.print("Detected code ");
 	Serial.print(code.type, 10);
 	Serial.print(" - 0x");
@@ -100,7 +100,7 @@ void setup() {
 //	rc.addProtocol(makeIntertechno());
 //	rc.addProtocol(makeTelis());
 //	rc.addProtocol(new SerialOutProtocolHandler());
-	rc.setHandler(rc_handler);
+	rc.setHandler(rc_handler, NULL);
 
 	Serial.println("Started");
 }

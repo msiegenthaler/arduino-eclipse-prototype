@@ -44,12 +44,13 @@ enum CPHState {
  *  - post (optional)
  * The sequence always starts with a HIGH pulse (first pulse passed to the pre is always a HIGH).
  */
-class ComposedProtocolHandler : public RemoteControlProtocolHandler {
+class ComposedProtocolHandler : public SingleTypeRemoteControlProtocolHandler {
 public:
 	ComposedProtocolHandler(uint8_t type, PartHandler *pre, DataPartHandler *data, PartHandler *post, uint8_t repeats);
-	void setHandler(void (*handler_fun)(rc_code));
+	void setHandler(void (*handler_fun)(rc_code, void*), void *object);
 	void processPulse(uint16_t pulseHighUs, uint16_t pulseLowUs);
 	PulseIterator* makePulseIterator(rc_code code);
+	uint8_t getType();
 private:
 	void handlePulse(uint16_t pulse);
 	void handleCandidate(uint32_t candidate);
@@ -60,7 +61,8 @@ private:
 	PartHandler *_post;
 	uint8_t _repeats;
 	uint8_t _repeats_to_trigger;
-	void (*_handler)(rc_code);
+	void (*_handler)(rc_code, void*);
+	void *_handler_object;
 	CPHState _state;
 	uint32_t _candidate;
 	uint16_t _candidate_t;

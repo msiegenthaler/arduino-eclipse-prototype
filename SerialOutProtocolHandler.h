@@ -14,7 +14,7 @@
 class SerialOutProtocolHandler : public RemoteControlProtocolHandler {
 public:
 	SerialOutProtocolHandler();
-	void setHandler(void (*handler_fun)(rc_code));
+	void setHandler(void (*handler_fun)(rc_code, void*), void *object);
 	void processPulse(uint16_t pulseHighUs, uint16_t pulseLowUs);
 	PulseIterator* makePulseIterator(rc_code code);
 };

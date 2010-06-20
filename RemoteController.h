@@ -35,12 +35,14 @@ public:
 
 	void addProtocol(RemoteControlProtocolHandler *protocol);
 	void removeProtocol(RemoteControlProtocolHandler *protocol);
+	void getProtocols(RemoteControlProtocolHandler ***protocols, uint8_t *count);
 
 	/**
 	 * Sets the callback function that is called on detected rc-codes
 	 * @param handler_fun pointer to the function
+	 * @param object will be passed to the handler fun
 	 */
-	void setHandler(void (*handler_fun)(rc_code));
+	void setHandler(void (*handler_fun)(rc_code, void*), void *object);
 
 	/**
 	 * Detects RC-codes. Call in every loop pass.
@@ -54,7 +56,8 @@ public:
 
 private:
 	uint8_t _sender_pin;
-	void (*_handler)(rc_code);
+	void (*_handler)(rc_code, void*);
+	void *_handler_object;
 	RemoteControlProtocolHandler **_protocols;
 	byte _protocols_count;
 };

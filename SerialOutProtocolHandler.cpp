@@ -4,7 +4,7 @@
 SerialOutProtocolHandler::SerialOutProtocolHandler() {
 }
 
-void SerialOutProtocolHandler::setHandler(void (*handler_fun)(rc_code)) {
+void SerialOutProtocolHandler::setHandler(void (*handler_fun)(rc_code,void*), void *object) {
 	//ignore
 }
 

@@ -9,6 +9,8 @@ void handle_rcrf(rc_code code, void *object) {
 IRRFReceiver::IRRFReceiver(RemoteController *rc) {
 	_rc = rc;
 	_rc->setHandler(handle_rcrf, this);
+	_type = 0x10;
+	_version = 0x00;
 }
 
 bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {

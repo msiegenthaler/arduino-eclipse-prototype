@@ -5,9 +5,7 @@
 #include "RemoteController.h"
 #include "RemoteControlProtocolHandler.h"
 
-#ifdef DEBUG_AVIEUL
-#define DEBUG_IRRF
-#endif
+//#define DEBUG_IRRF
 
 /**
  * Infrared or RF receiver.

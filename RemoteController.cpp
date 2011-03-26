@@ -59,7 +59,11 @@ void RemoteController::init(uint8_t sender_pin, uint8_t detector_pin) {
 	_protocols = NULL;
 
 #ifdef RC_DEBUG
-	Serial.print("rc: initialized.");
+	Serial.print("rc: initialized on pins ");
+	Serial.print(sender_pin, 10);
+	Serial.print(" and ");
+	Serial.print(detector_pin, 10);
+	Serial.println();
 #endif
 }
 
@@ -85,7 +89,8 @@ void RemoteController::addProtocol(RemoteControlProtocolHandler *protocol) {
 	_protocols_count++;
 
 #ifdef RC_DEBUG
-	Serial.println("rc: added protocol");
+	Serial.print("rc: added protocol. Count is now ");
+	Serial.println(_protocols_count, 10);
 #endif
 }
 void RemoteController::removeProtocol(RemoteControlProtocolHandler *protocol) {
@@ -105,7 +110,9 @@ void RemoteController::removeProtocol(RemoteControlProtocolHandler *protocol) {
 	protocol->setHandler(NULL, NULL);
 
 #ifdef RC_DEBUG
-	Serial.println("rc: removed protocol");
+	Serial.print("rc: removed protocol, ");
+	Serial.print(_protocols_count);
+	Serial.println(" left");
 #endif
 }
 

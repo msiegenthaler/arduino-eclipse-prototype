@@ -6,6 +6,7 @@
 #include "../arduino-xbee/Series1XBee.h"
 #include "../arduino-xbee/LowlevelXBee.h"
 #include "../arduino-xbee/NewSoftSerialApiModeXBee.h"
+#include "../arduino-xbee/HardSerialApiModeXBee.h"
 #include "IRRFReceiver.h"
 
 
@@ -28,12 +29,11 @@ int xbeeRcvPin = 7;
 int xbeeSendPin = 6;
 
 
-/*
 RemoteControlProtocolHandler* makeSony() {
 	uint16_t preSeq[] =  {0, 2450};
 	uint16_t zeroSeq[] = {500,  650};
 	uint16_t oneSeq[]  = {500, 1250};
-	return new ComposedProtocolHandler(0x1,
+	return new ComposedProtocolHandler(0x6,
 			new FixedPartHandler(preSeq, 2),
 			new SingleBitPartHandler(zeroSeq, oneSeq, 2, 12),
 			NULL, 3);
@@ -84,7 +84,7 @@ RemoteControlProtocolHandler* makeTelis4() {
 			new SingleBitPartHandler(zeroSeq, oneSeq, 1, 32),
 			NULL, 1);
 }
-
+/*
 void rc_handler(rc_code code, void* object) {
 	Serial.print("Detected code ");
 	Serial.print(code.type, 10);
@@ -102,18 +102,22 @@ LowlevelXBee *lowlevel;
 Series1XBee *xbee;
 
 void setup() {
-	Serial.begin(9600); // for debugging
+	Serial.begin(19200); // for debugging
 	pinMode(ledPin, OUTPUT); // sets the digital pin as output
 	digitalWrite(ledPin, LOW);
 
-	serial = new NewSoftSerial(xbeeRcvPin, xbeeSendPin);
-	serial->begin(19200);
-	lowlevel = new NewSoftSerialApiModeXBee(serial);
+	//serial = new NewSoftSerial(xbeeRcvPin, xbeeSendPin);
+	//serial->begin(19200);
+	//lowlevel = new NewSoftSerialApiModeXBee(serial);
+	Serial1.begin(19200);
+	lowlevel = new HardSerialApiModeXBee(&Serial1);
 	xbee = new Series1XBee(lowlevel);
 
 	rc = new RemoteController();
 	rc->init(3, 2);
 	IRRFReceiver *irrf = new IRRFReceiver(rc);
+
+	rc->addProtocol(makeSony());
 
 	AvieulService* services[] = { irrf };
 	avieul = new Avieul(xbee, services, 1);
@@ -123,7 +127,7 @@ void setup() {
 
 void loop() {
 	avieul->process();
-//	rc.detect();
+	rc->detect();
 }
 
 

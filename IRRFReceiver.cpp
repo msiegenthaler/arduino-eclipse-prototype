@@ -11,6 +11,22 @@ IRRFReceiver::IRRFReceiver(RemoteController *rc) {
 	_rc->setHandler(handle_rcrf, this);
 	_type = 0x10;
 	_version = 0x00;
+	_subscription = new SubscriptionManager(_sender);
+}
+
+void IRRFReceiver::processCall(uint16_t callType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
+	switch (callType) {
+	case 0x0001: { //unload
+		if (payload_length < 1) break;
+		removeProtocol(payload[0]);
+		break;
+	}
+	case 0x0002: { // unload all
+		removeAllProtocols();
+		break;
+	}
+	default: break;
+	}
 }
 
 bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
@@ -21,28 +37,13 @@ bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_
 			//ok
 			uint8_t data[] = { 0, 0, 0, 0, payload[0], 0x01 };
 			fillResponseHeader(data, requestType);
-			_sender->send(from, data, 5);
+			_sender->send(from, data, 6);
 		} else {
 			//failed
 			uint8_t data[] = { 0, 0, 0, 0, payload[0], 0xFF };
 			fillResponseHeader(data, requestType);
-			_sender->send(from, data, 5);
+			_sender->send(from, data, 6);
 		}
-		return true;
-	}
-	case 0x0002: { // unload
-		if (payload_length < 1) return false;
-		removeProtocol(payload[0]);
-		uint8_t data[] = { 0, 0, 0, 0, payload[0] };
-		fillResponseHeader(data, requestType);
-		_sender->send(from, data, 5);
-		return true;
-	}
-	case 0x0003: { // unload all
-		removeAllProtocols();
-		uint8_t data[] = { 0, 0, 0, 0 };
-		fillResponseHeader(data, requestType);
-		_sender->send(from, data, 4);
 		return true;
 	}
 	default:
@@ -53,7 +54,7 @@ bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_
 bool IRRFReceiver::addSubscription(XBeeAddress from, uint16_t subscriptionType) {
 	switch (subscriptionType) {
 	case 0x0001: // detected ir commands
-		addSubscriber(from);
+		_subscription->add(from);
 		return true;
 	default:
 		return false;
@@ -63,16 +64,15 @@ bool IRRFReceiver::addSubscription(XBeeAddress from, uint16_t subscriptionType) 
 void IRRFReceiver::removeSubscription(XBeeAddress from, uint16_t subscriptionType) {
 	switch (subscriptionType) {
 	case 0001: // detected ir commands
-		removeSubscriber(from);
+		_subscription->remove(from);
 		break;
 	default: break;
 	}
 }
 
 void convertUnit(uint16_t unitInUs, uint8_t count, uint8_t *data, uint16_t *out) {
-	for (uint8_t i=0; i<count; i++) {
+	for (uint8_t i=0; i<count; i++)
 		out[i] = unitInUs * data[i];
-	}
 }
 
 // 0	unit in us (2 bytes): units used in the rest of the message in microseconds (0-65535)
@@ -96,9 +96,13 @@ bool IRRFReceiver::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len
 	uint8_t bit_len = data[4];
 	uint8_t suffix_len = data[5];
 	uint8_t bit_count = data[6];
-	if (pre_len+bit_len+suffix_len+7 > len) {
+	if (pre_len+bit_len*2+suffix_len+7 != len) {
 #ifdef DEBUG_IRRF
-		Serial.print("irrfr: addsfp: malformed (count)");
+		Serial.print("irrfr: addsfp: malformed (");
+		Serial.print(len, 10);
+		Serial.print("!=");
+		Serial.print(pre_len+bit_len*2+suffix_len+7);
+		Serial.println(")");
 #endif
 		return false;
 	}
@@ -166,62 +170,27 @@ void IRRFReceiver::removeAllProtocols() {
 	}
 }
 
-inline bool exists(XBeeAddress *all, uint8_t count, XBeeAddress toFind) {
-	for (uint8_t i=0; i<count; i++) {
-		if (all[i] == toFind) return true;
-	}
-	return false;
-}
-
-void IRRFReceiver::addSubscriber(XBeeAddress from) {
-	if (exists(_subscribers, _subscriber_count, from)) return; //already subscribed
-
-	size_t size = sizeof(XBeeAddress) * (_subscriber_count + 1);
-	XBeeAddress* na = (XBeeAddress*)malloc(size);
-	memcpy(na, _subscribers, size);
-	na[_subscriber_count] = from;
-	free(_subscribers);
-	_subscribers = na;
-	_subscriber_count++;
-}
-
-void IRRFReceiver::removeSubscriber(XBeeAddress from) {
-	if (!exists(_subscribers, _subscriber_count, from)) return; //not subscribed
-
-	size_t size = sizeof(XBeeAddress) * (_subscriber_count - 1);
-	XBeeAddress* na = (XBeeAddress*)malloc(size);
-	uint8_t c=0;
-	for (uint8_t i=0; i<_subscriber_count; i++) {
-		if (_subscribers[i] == from) break;
-		na[c++] = _subscribers[i];
-	}
-	free(_subscribers);
-	_subscribers = na;
-	_subscriber_count = c;
-}
-
-
 void IRRFReceiver::handleReceivedCode(rc_code code) {
-	uint8_t data[9]; // 4 + 1 + 4
+	uint8_t data[13]; // 4 + 1 + 8
 	fillPublishHeader(data, 0x0001);
 	data[4] = code.type;
-	data[5] = (code.code >> 24) & 0xFF;
-	data[6] = (code.code >> 16) & 0xFF;
-	data[7] = (code.code >> 8) & 0xFF;
-	data[8] = code.code & 0xFF;
+	data[5] = 0;
+	data[6] = 0;
+	data[7] = 0;
+	data[8] = 0;
+	data[9] = (code.code >> 24) & 0xFF;
+	data[10] = (code.code >> 16) & 0xFF;
+	data[11] = (code.code >> 8) & 0xFF;
+	data[12] = code.code & 0xFF;
 
-	for (uint8_t i=0; i<_subscriber_count; i++) {
-		_sender->send(_subscribers[i], data, 9);
-	}
+	_subscription->publish(data, 13);
 
 #ifdef DEBUG_IRRF
 	Serial.print("irrf: sent received command ");
 	Serial.print(code.type, HEX);
 	Serial.print(" - ");
 	Serial.print(code.code, HEX);
-	Serial.print(" to ");
-	Serial.print(_subscriber_count, 10);
-	Serial.println(" subscribers.");
+	Serial.println(" to subscribers.");
 #endif
 }
 

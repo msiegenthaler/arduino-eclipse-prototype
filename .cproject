@@ -49,8 +49,8 @@
 <tool id="de.innot.avreclipse.tool.cpplinker.app.debug.310544662" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug">
 <option id="de.innot.avreclipse.cpplinker.option.libs.1316398318" name="Libraries (-l)" superClass="de.innot.avreclipse.cpplinker.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="coreboarduino"/>
-<listOptionValue builtIn="false" value="gidaivel-arduino-base"/>
-<listOptionValue builtIn="false" value="arduino-xbee"/>
+<listOptionValue builtIn="false" value="gidaivel-arduino-base-boarduino"/>
+<listOptionValue builtIn="false" value="arduino-xbee-boarduino"/>
 </option>
 <option id="de.innot.avreclipse.cpplinker.option.libpath.313452111" name="Libraries Path (-L)" superClass="de.innot.avreclipse.cpplinker.option.libpath" valueType="stringList">
 <listOptionValue builtIn="false" value="&quot;${workspace_loc:/gidaivel-arduino-irrf/lib}&quot;"/>
@@ -837,9 +837,11 @@
 <tool id="de.innot.avreclipse.tool.cpplinker.app.debug.1143217911" name="AVR C++ Linker" superClass="de.innot.avreclipse.tool.cpplinker.app.debug">
 <option id="de.innot.avreclipse.cpplinker.option.libs.182993309" name="Libraries (-l)" superClass="de.innot.avreclipse.cpplinker.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="coremega"/>
+<listOptionValue builtIn="false" value="gidaivel-arduino-base-mega"/>
+<listOptionValue builtIn="false" value="arduino-xbee-mega"/>
 </option>
 <option id="de.innot.avreclipse.cpplinker.option.libpath.9757174" name="Libraries Path (-L)" superClass="de.innot.avreclipse.cpplinker.option.libpath" valueType="stringList">
-<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Blink}/lib&quot;"/>
+<listOptionValue builtIn="false" value="&quot;${workspace_loc:/gidaivel-arduino-irrf/lib}&quot;"/>
 </option>
 </tool>
 <tool id="de.innot.avreclipse.tool.archiver.winavr.base.562092105" name="AVR Archiver" superClass="de.innot.avreclipse.tool.archiver.winavr.base"/>

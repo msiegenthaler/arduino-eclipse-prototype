@@ -19,7 +19,7 @@ class RemoteControlProtocolHandler;
 #define RC_PULSE_RESOLUTION 50 //in us
 #define RC_PULSE_RESOLUTION_HALF 25 //in us
 
-//#define RC_DEBUG //Serial debug
+#define RC_DEBUG //Serial debug
 
 class RemoteController {
 public:

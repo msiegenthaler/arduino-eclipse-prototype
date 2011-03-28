@@ -117,7 +117,7 @@ void setup() {
 	rc->init(3, 2);
 	IRRFReceiver *irrf = new IRRFReceiver(rc);
 
-	rc->addProtocol(makeSony());
+	//rc->addProtocol(makeSony());
 
 	AvieulService* services[] = { irrf };
 	avieul = new Avieul(xbee, services, 1);

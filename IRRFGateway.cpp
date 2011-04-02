@@ -1,12 +1,12 @@
-#include "IRRFReceiver.h"
+#include "IRRFGateway.h"
 #include "ComposedProtocolHandler.h"
 
 void handle_rcrf(rc_code code, void *object) {
-	IRRFReceiver *receiver = (IRRFReceiver*)object;
+	IRRFGateway *receiver = (IRRFGateway*)object;
 	receiver->handleReceivedCode(code);
 }
 
-IRRFReceiver::IRRFReceiver(RemoteController *rc) {
+IRRFGateway::IRRFGateway(RemoteController *rc) {
 	_rc = rc;
 	_rc->setHandler(handle_rcrf, this);
 	_type = 0x10;
@@ -14,7 +14,7 @@ IRRFReceiver::IRRFReceiver(RemoteController *rc) {
 	_subscription = new SubscriptionManager(_sender);
 }
 
-void IRRFReceiver::processCall(uint16_t callType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
+void IRRFGateway::processCall(uint16_t callType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
 	switch (callType) {
 	case 0x0001: { //unload
 		if (payload_length < 1) break;
@@ -25,11 +25,18 @@ void IRRFReceiver::processCall(uint16_t callType, XBeeAddress from, uint8_t* pay
 		removeAllProtocols();
 		break;
 	}
+	case 0x0010: { // send command
+		if (payload_length < 9) break;
+		uint64_t cmd = 0;
+		for (int i=1; i<9; i++)
+			cmd = (cmd << 8) | payload[i];
+		sendCommand(payload[0], cmd);
+	}
 	default: break;
 	}
 }
 
-bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
+bool IRRFGateway::processRequest(uint16_t requestType, XBeeAddress from, uint8_t* payload, uint8_t payload_length) {
 	switch (requestType) {
 	case 0x0001: {// load single-bit fixed-length
 		if (payload_length < 9) return false;
@@ -51,7 +58,7 @@ bool IRRFReceiver::processRequest(uint16_t requestType, XBeeAddress from, uint8_
 	}
 }
 
-bool IRRFReceiver::addSubscription(XBeeAddress from, uint16_t subscriptionType) {
+bool IRRFGateway::addSubscription(XBeeAddress from, uint16_t subscriptionType) {
 	switch (subscriptionType) {
 	case 0x0001: // detected ir commands
 		_subscription->add(from);
@@ -61,13 +68,27 @@ bool IRRFReceiver::addSubscription(XBeeAddress from, uint16_t subscriptionType) 
 	}
 }
 
-void IRRFReceiver::removeSubscription(XBeeAddress from, uint16_t subscriptionType) {
+void IRRFGateway::removeSubscription(XBeeAddress from, uint16_t subscriptionType) {
 	switch (subscriptionType) {
 	case 0001: // detected ir commands
 		_subscription->remove(from);
 		break;
 	default: break;
 	}
+}
+
+void IRRFGateway::sendCommand(uint8_t protocol_id, uint64_t code) {
+#ifdef DEBUG_IRRF
+		Serial.print("irrfr: sending irrf command ");
+		Serial.print((uint32_t)code, 10);
+		Serial.print(" (protocol-id ");
+		Serial.print(protocol_id, 10);
+		Serial.println(")");
+#endif
+		rc_code rc;
+		rc.type = protocol_id;
+		rc.code = code;
+		_rc->send_code(rc);
 }
 
 void convertUnit(uint16_t unitInUs, uint8_t count, uint8_t *data, uint16_t *out) {
@@ -89,7 +110,7 @@ void convertUnit(uint16_t unitInUs, uint8_t count, uint8_t *data, uint16_t *out)
 //		pulses in units that make up a "one" bit
 // *	suffix pulse (1 byte)*: [ exactly suffix length times ]
 //		pulses in units that make up the suffix
-bool IRRFReceiver::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len) {
+bool IRRFGateway::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len) {
 	uint16_t unitInUs = ((uint16_t)data[0]) << 8 | data[1];
 	uint8_t repeats = data[2];
 	uint8_t pre_len = data[3];
@@ -146,7 +167,7 @@ bool IRRFReceiver::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len
 	return true;
 }
 
-void IRRFReceiver::removeProtocol(uint8_t id) {
+void IRRFGateway::removeProtocol(uint8_t id) {
 	SingleTypeRemoteControlProtocolHandler **protocols;
 	uint8_t count;
 	_rc->getProtocols((RemoteControlProtocolHandler***)&protocols, &count);
@@ -159,7 +180,7 @@ void IRRFReceiver::removeProtocol(uint8_t id) {
 	}
 }
 
-void IRRFReceiver::removeAllProtocols() {
+void IRRFGateway::removeAllProtocols() {
 	SingleTypeRemoteControlProtocolHandler **protocols;
 	uint8_t count;
 	_rc->getProtocols((RemoteControlProtocolHandler***)&protocols, &count);
@@ -170,7 +191,7 @@ void IRRFReceiver::removeAllProtocols() {
 	}
 }
 
-void IRRFReceiver::handleReceivedCode(rc_code code) {
+void IRRFGateway::handleReceivedCode(rc_code code) {
 	uint8_t data[13]; // 4 + 1 + 8
 	fillPublishHeader(data, 0x0001);
 	data[4] = code.type;

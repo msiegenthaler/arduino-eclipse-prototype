@@ -1,5 +1,5 @@
-#ifndef IRRFRECEIVER_H_
-#define IRRFRECEIVER_H_
+#ifndef IRRFGateway_H_
+#define IRRFGateway_H_
 
 #include "../gidaivel-arduino-base/Avieul.h"
 #include "../gidaivel-arduino-base/SubscriptionManager.h"
@@ -11,9 +11,9 @@
 /**
  * Infrared or RF receiver.
  */
-class IRRFReceiver  : public AvieulService {
+class IRRFGateway  : public AvieulService {
 public:
-	IRRFReceiver(RemoteController *rc);
+	IRRFGateway(RemoteController *rc);
 
 	void handleReceivedCode(rc_code code);
 
@@ -26,10 +26,11 @@ protected:
 	inline bool addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len);
 	inline void removeProtocol(uint8_t id);
 	inline void removeAllProtocols();
+	inline void sendCommand(uint8_t protocol_id, uint64_t code);
 
 private:
 	RemoteController *_rc;
 	SubscriptionManager *_subscription;
 };
 
-#endif /* IRRFRECEIVER_H_ */
+#endif /* IRRFGateway_H_ */

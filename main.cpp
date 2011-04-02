@@ -7,7 +7,7 @@
 #include "../arduino-xbee/LowlevelXBee.h"
 #include "../arduino-xbee/NewSoftSerialApiModeXBee.h"
 #include "../arduino-xbee/HardSerialApiModeXBee.h"
-#include "IRRFReceiver.h"
+#include "IRRFGateway.h"
 
 
 extern "C" void __cxa_pure_virtual(void);
@@ -115,7 +115,7 @@ void setup() {
 
 	rc = new RemoteController();
 	rc->init(3, 2);
-	IRRFReceiver *irrf = new IRRFReceiver(rc);
+	IRRFGateway *irrf = new IRRFGateway(rc);
 
 	//rc->addProtocol(makeSony());
 

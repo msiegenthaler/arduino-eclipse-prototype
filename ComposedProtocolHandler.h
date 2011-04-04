@@ -112,4 +112,40 @@ private:
 };
 
 
+class FixedPulseIterator : public PulseIterator {
+public:
+	FixedPulseIterator(uint16_t *pulses, uint8_t count);
+	virtual bool nextPulse(uint16_t *pulseUs);
+private:
+	uint16_t *_pulses;
+	uint8_t _pulse_count;
+	uint8_t _pos;
+};
+
+class BitPulseIterator : public PulseIterator {
+public:
+	BitPulseIterator(uint16_t *zero_pulses, uint16_t *one_pulses, uint8_t count, uint8_t bit_count, uint32_t value);
+	virtual bool nextPulse(uint16_t *pulseUs);
+private:
+	uint16_t *_pulses_one;
+	uint16_t *_pulses_zero;
+	uint8_t _pulse_count;
+	uint8_t _bit_count;
+	uint8_t _pos_in_bit;
+	uint8_t _bit;
+	uint32_t _value;
+};
+
+class ComposedPulseIterator : public PulseIterator {
+public:
+	ComposedPulseIterator(PulseIterator **iterators, uint8_t count, uint8_t repeats);
+	virtual bool nextPulse(uint16_t *pulseUs);
+private:
+	PulseIterator **_iterators;
+	uint8_t _count;
+	uint8_t _repeats;
+	uint8_t _pos;
+	uint8_t _current_repetition;
+};
+
 #endif /* COMPOSEDPROTOCOLHANDLER_H_ */

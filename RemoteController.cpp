@@ -169,5 +169,41 @@ void RemoteController::detect() {
 }
 
 void RemoteController::send_code(rc_code code) {
-	//TODO
+	if (code.type >= _protocols_count) return;
+    RemoteControlProtocolHandler *protocol = _protocols[code.type];
+    PulseIterator *iterator = protocol->makePulseIterator(code);
+
+    bool cnt = true;
+    uint16_t pulse;
+    digitalWrite(_sender_pin, HIGH);
+	delayMicroseconds(1000);
+    while (true) {
+    	cnt = iterator->nextPulse(&pulse);
+    	delayMicroseconds(pulse);
+
+    	digitalWrite(_sender_pin, LOW);
+
+    	if (cnt) {
+			cnt = iterator->nextPulse(&pulse);
+			delayMicroseconds(pulse);
+    	}
+    	if (!cnt) break;
+
+    	digitalWrite(_sender_pin, HIGH);
+    }
+	digitalWrite(_sender_pin, LOW);
+    free(iterator);
+
+
+#ifdef RC_DEBUG_XX
+    iterator = protocol->makePulseIterator(code);
+    Serial.print("Code: ");
+    while (iterator->nextPulse(&pulse)) {
+    	Serial.print(pulse, 10);
+    	Serial.print(" ");
+    }
+    Serial.print(pulse, 10);
+    Serial.println(".");
+    free(iterator);
+#endif
 }

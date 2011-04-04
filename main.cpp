@@ -106,6 +106,9 @@ void setup() {
 	pinMode(ledPin, OUTPUT); // sets the digital pin as output
 	digitalWrite(ledPin, LOW);
 
+	pinMode(3, HIGH);
+	digitalWrite(3, HIGH);
+
 	//serial = new NewSoftSerial(xbeeRcvPin, xbeeSendPin);
 	//serial->begin(19200);
 	//lowlevel = new NewSoftSerialApiModeXBee(serial);
@@ -123,6 +126,8 @@ void setup() {
 	avieul = new Avieul(xbee, services, 1);
 
 	Serial.println("Started");
+	delay(1000);
+	digitalWrite(3, LOW);
 }
 
 void loop() {

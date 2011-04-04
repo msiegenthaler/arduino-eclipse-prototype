@@ -176,8 +176,12 @@ void ComposedProtocolHandler::handleCandidate(uint32_t candidate) {
 }
 
 PulseIterator* ComposedProtocolHandler::makePulseIterator(rc_code code) {
-	//TODO
-	return NULL;
+	PulseIterator **iterators = (PulseIterator**)malloc(sizeof(PulseIterator*)*3);
+	uint8_t index = 0;
+	if (_pre) iterators[index++] = _pre->pulseIterator(code.code);
+	iterators[index++] = _data->pulseIterator(code.code);
+	if (_post) iterators[index++] = _post->pulseIterator(code.code);
+	return new ComposedPulseIterator(iterators, index, _repeats*10); //TODO
 }
 
 
@@ -224,8 +228,7 @@ PHResult FixedPartHandler::processPulse(uint16_t pulse) {
 }
 
 PulseIterator* FixedPartHandler::pulseIterator(uint32_t value) {
-	//TODO
-	return NULL;
+	return new FixedPulseIterator(_pulses, _pulse_count);
 }
 
 //Single Bit
@@ -277,6 +280,79 @@ uint32_t SingleBitPartHandler::value() {
 
 
 PulseIterator* SingleBitPartHandler::pulseIterator(uint32_t value) {
-	//TODO
-	return NULL;
+	return new BitPulseIterator(_pulses_zero, _pulses_one, _pulse_count, _bit_count, value);
+}
+
+
+
+FixedPulseIterator::FixedPulseIterator(uint16_t *pulses, uint8_t count) {
+	_pulses = pulses;
+	_pulse_count = count;
+	_pos = 0;
+}
+
+bool FixedPulseIterator::nextPulse(uint16_t *pulseUs) {
+	*pulseUs = _pulses[_pos++];
+	if (_pos < _pulse_count) return true;
+	else {
+		_pos = 0;
+		return false;
+	}
+}
+
+
+BitPulseIterator::BitPulseIterator(uint16_t *zero_pulses, uint16_t *one_pulses, uint8_t count, uint8_t bit_count, uint32_t value) {
+	_pulses_zero = zero_pulses;
+	_pulses_one = one_pulses;
+	_pulse_count = count;
+	_bit_count = bit_count;
+	_value = value;
+	_pos_in_bit = 0;
+	_bit = 1;
+}
+
+bool BitPulseIterator::nextPulse(uint16_t *pulseUs) {
+	bool currentBit = (_value & (1 << (_bit_count - _bit))) != 0;
+	uint16_t *pulses;
+	if (currentBit) pulses = _pulses_one;
+	else pulses = _pulses_zero;
+
+	*pulseUs = pulses[_pos_in_bit];
+	if (_pos_in_bit+1 < _pulse_count) {
+		_pos_in_bit++;
+		return true;
+	} else if (_bit < _bit_count) {
+		_bit++;
+		_pos_in_bit = 0;
+		return true;
+	} else {
+		_pos_in_bit = 0;
+		_bit = 1;
+		return false;
+	}
+}
+
+ComposedPulseIterator::ComposedPulseIterator(PulseIterator **iterators, uint8_t count, uint8_t repeats) {
+	_iterators = iterators;
+	_count = count;
+	_pos = 0;
+	_repeats = repeats;
+	_current_repetition = 1;
+}
+
+bool ComposedPulseIterator::nextPulse(uint16_t *pulseUs) {
+	if (_iterators[_pos]->nextPulse(pulseUs)) {
+		return true;
+	} else if (_pos+1 < _count) {
+		_pos++;
+		return true;
+	} else if (_current_repetition < _repeats) {
+		_current_repetition++;
+		_pos = 0;
+		return true;
+	} else {
+		_current_repetition = 0;
+		_pos = 0;
+		return false;
+	}
 }

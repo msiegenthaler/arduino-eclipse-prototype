@@ -140,7 +140,7 @@ bool IRRFGateway::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len)
 
 
 	PartHandler *pre;
-	if (pre_pulses > 0) {
+	if (pre_len > 0) {
 		uint16_t us[pre_len];
 		convertUnit(unitInUs, pre_len, pre_pulses, us);
 		pre = new FixedPartHandler(us, pre_len);
@@ -155,12 +155,13 @@ bool IRRFGateway::addSingleFixedProtocol(uint8_t id, uint8_t *data, uint8_t len)
 	bit = new SingleBitPartHandler(us_0, us_1, bit_len, bit_count);
 
 	PartHandler *suffix;
-	if (suffix_pulses > 0) {
+	if (suffix_len > 0) {
 		uint16_t us[suffix_len];
 		convertUnit(unitInUs, suffix_len, suffix_pulses, us);
 		suffix = new FixedPartHandler(us, suffix_len);
-	} else
+	} else {
 		suffix = NULL;
+	}
 
 	ComposedProtocolHandler *handler = new ComposedProtocolHandler(id, pre, bit, suffix, repeats);
 	_rc->addProtocol(handler);

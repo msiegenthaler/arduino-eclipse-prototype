@@ -10,11 +10,10 @@ class PulseIterator {
 public:
 	/**
 	 * Returns the next pulse.
-	 * @param pulseHighUs duration in microseconds of the HIGH-pulse
-	 * @param pulseLowUs duration in microseconds of the LOW-pulse
+	 * @param pulseUs duration in microseconds of the pulse
 	 * @return true if there are more pulses
 	 */
-	virtual bool nextPulse(uint16_t *pulseHighUs, uint16_t *pulseLowUs);
+	virtual bool nextPulse(uint16_t *pulseUs);
 };
 
 /**

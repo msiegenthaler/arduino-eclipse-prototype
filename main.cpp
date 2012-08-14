@@ -1,4 +1,4 @@
-#include "WProgram.h"
+#include "Arduino.h"
 
 extern "C" void __cxa_pure_virtual(void);
 void __cxa_pure_virtual(void) {}
